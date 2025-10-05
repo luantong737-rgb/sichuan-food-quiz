@@ -6,175 +6,175 @@
 <style>
   :root {
     --bg:#0f1216; --panel:#171b21; --accent:#5fd9a6; --text:#e9eef3; --muted:#9aa5b1; --wrong:#ff6b6b;
+    --ok-bg:#12251e; --bad-bg:#2a1416;
   }
-  * { box-sizing: border-box; }
-  body { margin:0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans SC", Arial, "PingFang SC", "Hiragino Sans GB", sans-serif;
-         background:linear-gradient(180deg,#0c0f13,#0f1216 40%, #0a0c0f); color:var(--text); }
-  .wrap { max-width: 880px; margin: 24px auto; padding: 20px; }
-  header { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:14px; }
-  h1 { font-size: clamp(20px, 3.5vw, 28px); margin:0; letter-spacing:.5px; }
-  .progress { position:relative; width: 100%; height:10px; background:#0a0d11; border-radius:999px; overflow:hidden; }
-  .bar { position:absolute; left:0; top:0; bottom:0; width:0%; background:linear-gradient(90deg, var(--accent), #86ffd0); transition:width .35s ease; }
-  .card { background:var(--panel); border:1px solid #1f2530; border-radius:18px; padding: 18px; box-shadow: 0 10px 30px rgba(0,0,0,.25); }
-  .stem { font-size: clamp(16px, 2.6vw, 20px); margin: 4px 0 14px; line-height:1.6; }
-  .hint { color: var(--muted); font-size: 13px; margin-bottom: 4px; }
-  .choices { display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:12px; margin: 12px 0 6px; }
-  .choice {
-    position:relative; padding:14px 14px 14px 44px; border:1px solid #242b36; border-radius:12px;
-    background: linear-gradient(180deg, #1a2029, #141920); cursor: pointer; user-select: none;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.04), 0 6px 16px rgba(0,0,0,.18);
-    transition: transform .15s ease, border-color .2s ease, background .2s ease;
-    animation: floatIn .45s cubic-bezier(.2,.8,.2,1) both;
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:radial-gradient(80vw 80vh at 20% 10%,#12171f,#0b0f14 60%,#070a0e);
+    color:var(--text); font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans SC","PingFang SC","Hiragino Sans GB",Arial,sans-serif;
+    overflow-x:hidden;
   }
-  .choice:hover { transform: translateY(-2px); border-color:#2e3746; }
-  .choice[aria-pressed="true"] { border-color: var(--accent); background: linear-gradient(180deg, #18242a, #122423); }
-  .bullet {
-    position:absolute; left:12px; top: 50%; translate:0 -50%;
-    width:22px; height:22px; border-radius:999px; border: 2px solid #3a4658; display:grid; place-items:center;
+  .wrap{max-width: 900px; margin: 22px auto; padding: 20px;}
+  header{display:flex;align-items:center;gap:16px;justify-content:space-between;margin-bottom:14px}
+  h1{margin:0;font-size:clamp(20px,3.6vw,30px);letter-spacing:.4px}
+  .progress{position:relative;width:100%;max-width:420px;height:10px;border-radius:999px;background:#0b1016;overflow:hidden}
+  .bar{position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(90deg,var(--accent),#86ffd0)}
+  .card{background:var(--panel);border:1px solid #1f2631;border-radius:18px;padding:18px;box-shadow:0 10px 30px rgba(0,0,0,.28)}
+  .hint{color:var(--muted);font-size:13px;margin-bottom:6px}
+  .stem{font-size:clamp(16px,2.5vw,20px);line-height:1.65;margin:6px 0 14px}
+  .choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+  .choice{
+    position:relative;padding:14px 14px 14px 46px;border:1px solid #242b36;border-radius:12px;
+    background:linear-gradient(180deg,#1a2029,#141920);cursor:pointer;user-select:none;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.04),0 6px 16px rgba(0,0,0,.18);
+    transition:transform .12s ease,border-color .2s ease,background .2s ease, box-shadow .2s ease;
+    animation:floatIn .45s cubic-bezier(.2,.8,.2,1) both;
   }
-  .choice[aria-pressed="true"] .bullet { border-color: var(--accent); }
-  .bullet::after { content:""; width:10px; height:10px; border-radius:999px; background:transparent; transition: background .2s ease; }
-  .choice[aria-pressed="true"] .bullet::after { background: var(--accent); }
-  .actions { display:flex; gap:10px; flex-wrap:wrap; margin-top: 12px; }
-  button {
-    background: #1a232c; color: var(--text); border:1px solid #263244; border-radius:12px; padding:10px 14px; cursor:pointer;
-    transition: transform .12s ease, background .2s ease, border-color .2s ease;
+  .choice:hover{transform:translateY(-1px);border-color:#2b3443}
+  .choice[aria-pressed="true"]{border-color:#2d5f50;background:linear-gradient(180deg,#162622,#111c18)}
+  .bullet{
+    position:absolute;left:12px;top:50%;translate:0 -50%;width:22px;height:22px;border-radius:999px;
+    border:2px solid #3a4658;display:grid;place-items:center
   }
-  button:hover { transform: translateY(-1px); background:#1d2a36; }
-  button.primary { background: var(--accent); color:#0b130f; border-color: transparent; font-weight: 600; }
-  button.primary:hover { filter: brightness(1.05); }
-  .result { margin-top:14px; padding:12px; border:1px dashed #2a3340; border-radius:12px; background:#12161c; }
-  .correct { color: var(--accent); }
-  .wrong { color: var(--wrong); }
-  .footer { color: var(--muted); font-size:12px; margin-top:10px; text-align:center; }
-  .tag { font-size: 12px; color:#9bd6bd; border:1px solid #2d6b58; background:#0f1b18; padding:3px 8px; border-radius:999px; }
-  @keyframes floatIn {
-    from { transform: translateY(16px); opacity: 0; }
-    to   { transform: translateY(0); opacity: 1; }
+  .choice[aria-pressed="true"] .bullet{border-color:var(--accent)}
+  .bullet::after{content:"";width:10px;height:10px;border-radius:999px;background:transparent;transition:background .15s}
+  .choice[aria-pressed="true"] .bullet::after{background:var(--accent)}
+  /* 立即判定颜色 */
+  .choice.right{border-color:var(--accent)!important;background:linear-gradient(180deg,#173126,#0f1e19)!important;box-shadow:0 0 0 1px rgba(95,217,166,.2),0 10px 20px rgba(25,90,70,.25)}
+  .choice.wrong{border-color:var(--wrong)!important;background:linear-gradient(180deg,#2c1216,#1b1012)!important;box-shadow:0 0 0 1px rgba(255,107,107,.18),0 10px 20px rgba(100,20,20,.25)}
+  .flash-ok{animation:okFlash .5s ease}
+  .flash-bad{animation:badFlash .5s ease}
+  @keyframes okFlash{from{box-shadow:0 0 0 0 rgba(95,217,166,.6)}to{box-shadow:0 0 0 10px rgba(95,217,166,0)}}
+  @keyframes badFlash{from{box-shadow:0 0 0 0 rgba(255,107,107,.6)}to{box-shadow:0 0 0 10px rgba(255,107,107,0)}}
+  /* 点击抖动 */
+  .shake{animation:shake .25s linear}
+  @keyframes shake{
+    10%{transform:translateX(-2px)} 20%{transform:translateX(2px)}
+    30%{transform:translateX(-2px)} 40%{transform:translateX(2px)}
+    50%{transform:translateX(-1px)} 60%{transform:translateX(1px)}
+    70%{transform:translateX(0)}
   }
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+  button{
+    background:#1a232c;color:var(--text);border:1px solid #263244;border-radius:12px;padding:10px 14px;cursor:pointer;
+    transition:transform .1s ease, background .2s ease, border-color .2s ease;
+  }
+  button:hover{transform:translateY(-1px);background:#1d2a36}
+  button.primary{background:var(--accent);color:#0b130f;border-color:transparent;font-weight:600}
+  button.primary:hover{filter:brightness(1.05)}
+  .result{margin-top:14px;padding:12px;border:1px dashed #2a3340;border-radius:12px;background:#12161c}
+  .footer{color:var(--muted);font-size:12px;margin-top:10px;text-align:center}
+  @keyframes floatIn{from{transform:translateY(16px);opacity:0}to{transform:translateY(0);opacity:1}}
+
+  /* ---- 开场动画遮罩 ---- */
+  .intro{
+    position:fixed;inset:0;background:radial-gradient(80vw 80vh at 50% 40%,#0c1117,#070a0e);display:grid;place-items:center;z-index:9999;
+    animation:fadeIn .6s ease both;
+  }
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  .intro-card{
+    text-align:center; max-width: min(90vw,900px); padding: 40px 24px;
+  }
+  .intro-title{
+    font-size: clamp(24px, 5vw, 44px); font-weight: 800; letter-spacing:.5px; line-height:1.25;
+    background:linear-gradient(90deg,#9ef7d2,#c9fff0,#9ef7d2); -webkit-background-clip:text; background-clip:text; color:transparent;
+    filter: drop-shadow(0 6px 18px rgba(140,255,214,.15));
+    animation:titleFloat 1.6s ease-out both;
+  }
+  @keyframes titleFloat{from{transform:translateY(12px);opacity:0}to{transform:translateY(0);opacity:1}}
+  .intro-sub{color:#a7b2bf;margin:10px 0 22px}
+  .intro-btn{
+    padding:12px 18px;border-radius:12px;border:0;background:var(--accent);color:#0b130f;font-weight:700;cursor:pointer;
+    box-shadow:0 8px 20px rgba(95,217,166,.25);
+  }
+  .intro-btn:active{transform:translateY(1px)}
 </style>
 
 <body>
+  <!-- 开场动画 -->
+  <div class="intro" id="intro">
+    <div class="intro-card">
+      <div class="intro-title">熊博欢迎来到为你定制的四川美食问答</div>
+      <div class="intro-sub">点击下方按钮开始挑战，选择题会立即判定对错。</div>
+      <button class="intro-btn" id="startBtn">开始游戏</button>
+    </div>
+  </div>
+
   <div class="wrap">
     <header>
-      <h1>四川美食知识问答 <span class="tag">选项会“浮”出来</span></h1>
-      <div style="flex:1; max-width: 380px;">
-        <div class="progress"><div class="bar" id="bar"></div></div>
-      </div>
+      <h1>四川美食知识问答</h1>
+      <div class="progress"><div class="bar" id="bar"></div></div>
     </header>
-
-    <div class="card" id="game">
-      <!-- 游戏内容将由 JS 渲染 -->
-    </div>
-
-    <p class="footer">说明：带「可多选」的题需要选择所有正确项才算对；移动端也可作答。</p>
+    <div class="card" id="game"></div>
+    <p class="footer">提示：点击选项会立即显示对错；多选题每个正确项会显示为绿色。</p>
   </div>
 
 <script>
 /*
-  数据结构说明：
-  - type: "single" | "multi"  单选 / 多选
-  - q: 题干
-  - options: 选项数组
-  - ans: 正确答案的索引数组（多选时含多个）
-  - exp: 解析
+  题库：单选/多选；ans 为正确索引数组
 */
 const BANK = [
-  {
-    type: "multi",
-    q: "以下哪些属于四川（含成都）知名小吃？（可多选）",
-    options: ["钟水饺", "担担面", "锅盖面", "龙抄手", "卤煮火烧"],
-    ans: [0,1,3],
-    exp: "钟水饺、担担面、龙抄手均为四川/成都经典小吃；锅盖面（江浙）、卤煮火烧（北京）。"
-  },
-  {
-    type: "single",
-    q: "以下哪道菜最能代表“回锅”的烹饪方法？",
-    options: ["回锅肉", "宫保鸡丁", "麻婆豆腐", "水煮鱼"],
-    ans: [0],
-    exp: "回锅肉是先煮后切再回锅炒制的代表菜。"
-  },
-  {
-    type: "multi",
-    q: "四川菜常讲“七滋八味”，下列哪几项是其常见味型？（可多选）",
-    options: ["麻辣", "鱼香", "怪味", "茄汁", "姜葱"],
-    ans: [0,1,2],
-    exp: "麻辣、鱼香、怪味等均属川菜味型；茄汁偏西式，姜葱不作为川菜味型名。"
-  },
-  {
-    type: "single",
-    q: "“麻婆豆腐”中“麻”的主要来源是？",
-    options: ["郫县豆瓣", "花椒", "干辣椒", "陈皮"],
-    ans: [1],
-    exp: "川菜“麻”来自花椒；“辣”主要来自辣椒与豆瓣。"
-  },
-  {
-    type: "single",
-    q: "下列哪一种是四川地区有代表性的发酵/调味制品？",
-    options: ["郫县豆瓣", "腐乳芝麻酱", "豆豉拌面酱", "草莓酱"],
-    ans: [0],
-    exp: "郫县豆瓣是川菜灵魂调料之一。"
-  },
-  {
-    type: "multi",
-    q: "说到四川火锅的典型搭配，下面哪些说法更贴切？（可多选）",
-    options: ["红锅牛油锅底", "蘸料以香油+蒜为主", "主打清汤不放辣椒", "常配毛肚鸭肠等涮品"],
-    ans: [0,1,3],
-    exp: "川渝牛油锅底+香油蒜泥蘸料最典型，清汤更像其他地区风格。"
-  },
-  {
-    type: "single",
-    q: "“夫妻肺片”的“肺”最初多指？",
-    options: ["真正的肺", "牛杂（以牛肚、牛筋等为主）", "猪下水", "鱼腩"],
-    ans: [1],
-    exp: "传统上指“废片”的谐音，多为牛杂拼盘。"
-  },
-  {
-    type: "multi",
-    q: "与“鱼香”味型常见搭配的基本调料有？（可多选）",
-    options: ["泡椒/豆瓣", "糖", "醋", "孜然", "芝麻酱"],
-    ans: [0,1,2],
-    exp: "鱼香是酸甜咸辣蒜姜葱复合味，常用泡椒/豆瓣、糖、醋。"
-  }
+  {type:"multi", q:"以下哪些属于四川（含成都）知名小吃？（可多选）",
+   options:["钟水饺","担担面","锅盖面","龙抄手","卤煮火烧"], ans:[0,1,3],
+   exp:"钟水饺、担担面、龙抄手为四川/成都经典；锅盖面（江浙）、卤煮火烧（北京）。"},
+  {type:"single", q:"以下哪道菜最能代表“回锅”的烹饪方法？",
+   options:["回锅肉","宫保鸡丁","麻婆豆腐","水煮鱼"], ans:[0],
+   exp:"回锅肉：先煮后切再回锅炒制。"},
+  {type:"multi", q:"四川菜常讲“七滋八味”，下列哪几项是其常见味型？（可多选）",
+   options:["麻辣","鱼香","怪味","茄汁","姜葱"], ans:[0,1,2],
+   exp:"麻辣、鱼香、怪味等属川菜味型；茄汁偏西式，姜葱不是味型名。"},
+  {type:"single", q:"“麻婆豆腐”中“麻”的主要来源是？",
+   options:["郫县豆瓣","花椒","干辣椒","陈皮"], ans:[1],
+   exp:"“麻”来自花椒，“辣”来自辣椒与豆瓣。"},
+  {type:"single", q:"下列哪一种是四川地区有代表性的发酵/调味制品？",
+   options:["郫县豆瓣","腐乳芝麻酱","豆豉拌面酱","草莓酱"], ans:[0],
+   exp:"郫县豆瓣被称为川菜的灵魂。"},
+  {type:"multi", q:"关于四川火锅的典型搭配，下面哪些更贴切？（可多选）",
+   options:["红锅牛油锅底","蘸料以香油+蒜为主","主打清汤不放辣椒","常配毛肚鸭肠"], ans:[0,1,3],
+   exp:"川渝常见为牛油锅底、香油蒜泥蘸料，毛肚鸭肠是代表涮品。"},
+  {type:"single", q:"“夫妻肺片”的“肺”最初多指？",
+   options:["真正的肺","牛杂（以牛肚、牛筋为主）","猪下水","鱼腩"], ans:[1],
+   exp:"传统上“肺片”多为各类牛杂拼。"},
+  {type:"multi", q:"与“鱼香”味型常见搭配的基本调料有？（可多选）",
+   options:["泡椒/豆瓣","糖","醋","孜然","芝麻酱"], ans:[0,1,2],
+   exp:"鱼香为酸甜咸辣蒜姜葱复合味，常用泡椒/豆瓣、糖与醋。"}
 ];
 
-// 生成一套题（可随机抽题/打乱选项）
-function makeQuiz() {
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function makeQuiz(){
   const qs = structuredClone(BANK);
-  // 打乱题目顺序（你也可以固定顺序）
   shuffle(qs);
-  // 每道题的选项顺序也打乱，但要同步更新答案索引
-  qs.forEach(item => {
-    const zipped = item.options.map((opt, i) => ({opt, i}));
-    shuffle(zipped);
-    item.options = zipped.map(z => z.opt);
-    const oldToNew = new Map(zipped.map((z, newIdx) => [z.i, newIdx]));
-    item.ans = item.ans.map(i => oldToNew.get(i)).sort((a,b)=>a-b);
+  qs.forEach(item=>{
+    const z = item.options.map((opt,i)=>({opt,i})); shuffle(z);
+    item.options = z.map(o=>o.opt);
+    const map = new Map(z.map((o,idx)=>[o.i,idx]));
+    item.ans = item.ans.map(i=>map.get(i)).sort((a,b)=>a-b);
   });
   return qs;
 }
 
-function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
-
 let QUIZ = makeQuiz();
 let idx = 0;
-let picked = new Map(); // idx -> Set<number>
+let picked = new Map();          // idx -> Set<number>
 const game = document.getElementById('game');
 const bar = document.getElementById('bar');
 
+document.getElementById('startBtn').onclick = ()=>{
+  document.getElementById('intro').style.display='none';
+};
 render();
 
-function render() {
+function render(){
   const total = QUIZ.length;
   const q = QUIZ[idx];
-  bar.style.width = ((idx)/total*100).toFixed(1) + "%";
+  bar.style.width = ((idx)/total*100).toFixed(1)+"%";
 
   game.innerHTML = `
-    <div class="hint">第 ${idx+1} / ${total} 题 · ${q.type==="multi" ? "可多选" : "单选"}</div>
+    <div class="hint">第 ${idx+1} / ${total} 题 · ${q.type==="multi"?"可多选":"单选"}</div>
     <div class="stem">${q.q}</div>
     <div class="choices" id="choices"></div>
     <div class="actions">
-      <button id="prev" ${idx===0?"disabled":""}>上一题</button>
+      <button id="prev">上一题</button>
       <button id="clear">清空选择</button>
       <div style="flex:1"></div>
       <button id="next">下一题</button>
@@ -186,32 +186,46 @@ function render() {
   const c = document.getElementById('choices');
   const chosen = picked.get(idx) ?? new Set();
 
-  q.options.forEach((text, i) => {
+  // 渲染选项 + 点击即判定 + 抖动
+  q.options.forEach((text,i)=>{
     const div = document.createElement('div');
-    div.className = 'choice';
+    div.className='choice';
     div.setAttribute('role','button');
-    div.setAttribute('aria-pressed', chosen.has(i) ? 'true' : 'false');
+    div.setAttribute('aria-pressed', chosen.has(i) ? 'true':'false');
     div.style.animationDelay = `${i*60}ms`;
-
     div.innerHTML = `<span class="bullet"></span>${text}`;
-    div.onclick = () => {
-      if(q.type === "single"){
-        chosen.clear();
-        chosen.add(i);
-      } else {
-        chosen.has(i) ? chosen.delete(i) : chosen.add(i);
-      }
+
+    div.onclick = ()=>{
+      // 点击抖动
+      div.classList.remove('shake'); void div.offsetWidth; div.classList.add('shake');
+
+      // 选择逻辑
+      if(q.type==="single"){ chosen.clear(); chosen.add(i); }
+      else{ chosen.has(i)?chosen.delete(i):chosen.add(i); }
       picked.set(idx, new Set(chosen));
-      // 更新视觉状态
-      document.querySelectorAll('.choice').forEach((el, k)=>{
-        el.setAttribute('aria-pressed', chosen.has(k) ? 'true' : 'false');
+
+      // 立即判定：本选项是否正确
+      const isCorrect = q.ans.includes(i);
+      // 先清除之前的状态
+      div.classList.remove('right','wrong','flash-ok','flash-bad');
+      document.querySelectorAll('.choice').forEach((el,k)=>{
+        el.setAttribute('aria-pressed', chosen.has(k) ? 'true':'false');
       });
+      // 标记颜色并闪烁
+      if(isCorrect){ div.classList.add('right','flash-ok'); }
+      else{ div.classList.add('wrong','flash-bad'); }
     };
     c.appendChild(div);
   });
 
-  document.getElementById('prev').onclick = ()=>{ if(idx>0){ idx--; render(); }};
-  document.getElementById('next').onclick = ()=>{ if(idx<total-1){ idx++; render(); }};
+  // 按钮也抖动
+  ['prev','clear','next','submit'].forEach(id=>{
+    const b = document.getElementById(id);
+    b.addEventListener('click', ()=>{ b.classList.remove('shake'); void b.offsetWidth; b.classList.add('shake'); });
+  });
+
+  document.getElementById('prev').onclick = ()=>{ if(idx>0){ idx--; render(); } };
+  document.getElementById('next').onclick = ()=>{ if(idx<total-1){ idx++; render(); } };
   document.getElementById('clear').onclick = ()=>{ picked.delete(idx); render(); };
   document.getElementById('submit').onclick = finish;
 }
@@ -230,28 +244,26 @@ function finish(){
     details.push(`
       <p style="margin:.4em 0 .8em">
         <b>${i+1}. ${q.q}</b><br>
-        你的选择：<span class="${ok?'correct':'wrong'}">${chosenText}</span><br>
-        正确答案：<span class="correct">${correctText}</span><br>
+        你的选择：<span style="color:${ok?'#5fd9a6':'#ff6b6b'}">${chosenText}</span><br>
+        正确答案：<span style="color:#5fd9a6">${correctText}</span><br>
         <span class="hint">${q.exp}</span>
       </p>
     `);
   }
-
   game.innerHTML = `
-    <div class="stem" style="margin-top:4px">成绩：<b style="color:var(--accent)">${right} / ${total}</b></div>
+    <div class="stem">成绩：<b style="color:var(--accent)">${right} / ${total}</b></div>
     <div class="result">${details.join("")}</div>
     <div class="actions" style="margin-top:14px">
       <button id="again">再来一局（随机顺序）</button>
-      <button id="review">查看全部题目逐题作答</button>
+      <button id="review">恢复原始顺序逐题复习</button>
     </div>
   `;
   bar.style.width = "100%";
-  document.getElementById('again').onclick = ()=>{
-    QUIZ = makeQuiz(); idx=0; picked.clear(); render();
-  };
-  document.getElementById('review').onclick = ()=>{
-    QUIZ = structuredClone(BANK); idx=0; picked.clear(); render();
-  };
+
+  const again = document.getElementById('again');
+  again.onclick = ()=>{ again.classList.add('shake'); QUIZ = makeQuiz(); idx=0; picked.clear(); render(); };
+  const review = document.getElementById('review');
+  review.onclick = ()=>{ review.classList.add('shake'); QUIZ = structuredClone(BANK); idx=0; picked.clear(); render(); };
 }
 </script>
 </body>
