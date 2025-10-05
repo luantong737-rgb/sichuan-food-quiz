@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="zh">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>四川美食知识问答</title>
+<style>
+  :root {
+    --bg:#0f1216; --panel:#171b21; --accent:#5fd9a6; --text:#e9eef3; --muted:#9aa5b1; --wrong:#ff6b6b;
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans SC", Arial, "PingFang SC", "Hiragino Sans GB", sans-serif;
+         background:linear-gradient(180deg,#0c0f13,#0f1216 40%, #0a0c0f); color:var(--text); }
+  .wrap { max-width: 880px; margin: 24px auto; padding: 20px; }
+  header { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:14px; }
+  h1 { font-size: clamp(20px, 3.5vw, 28px); margin:0; letter-spacing:.5px; }
+  .progress { position:relative; width: 100%; height:10px; background:#0a0d11; border-radius:999px; overflow:hidden; }
+  .bar { position:absolute; left:0; top:0; bottom:0; width:0%; background:linear-gradient(90deg, var(--accent), #86ffd0); transition:width .35s ease; }
+  .card { background:var(--panel); border:1px solid #1f2530; border-radius:18px; padding: 18px; box-shadow: 0 10px 30px rgba(0,0,0,.25); }
+  .stem { font-size: clamp(16px, 2.6vw, 20px); margin: 4px 0 14px; line-height:1.6; }
+  .hint { color: var(--muted); font-size: 13px; margin-bottom: 4px; }
+  .choices { display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:12px; margin: 12px 0 6px; }
+  .choice {
+    position:relative; padding:14px 14px 14px 44px; border:1px solid #242b36; border-radius:12px;
+    background: linear-gradient(180deg, #1a2029, #141920); cursor: pointer; user-select: none;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.04), 0 6px 16px rgba(0,0,0,.18);
+    transition: transform .15s ease, border-color .2s ease, background .2s ease;
+    animation: floatIn .45s cubic-bezier(.2,.8,.2,1) both;
+  }
+  .choice:hover { transform: translateY(-2px); border-color:#2e3746; }
+  .choice[aria-pressed="true"] { border-color: var(--accent); background: linear-gradient(180deg, #18242a, #122423); }
+  .bullet {
+    position:absolute; left:12px; top: 50%; translate:0 -50%;
+    width:22px; height:22px; border-radius:999px; border: 2px solid #3a4658; display:grid; place-items:center;
+  }
+  .choice[aria-pressed="true"] .bullet { border-color: var(--accent); }
+  .bullet::after { content:""; width:10px; height:10px; border-radius:999px; background:transparent; transition: background .2s ease; }
+  .choice[aria-pressed="true"] .bullet::after { background: var(--accent); }
+  .actions { display:flex; gap:10px; flex-wrap:wrap; margin-top: 12px; }
+  button {
+    background: #1a232c; color: var(--text); border:1px solid #263244; border-radius:12px; padding:10px 14px; cursor:pointer;
+    transition: transform .12s ease, background .2s ease, border-color .2s ease;
+  }
+  button:hover { transform: translateY(-1px); background:#1d2a36; }
+  button.primary { background: var(--accent); color:#0b130f; border-color: transparent; font-weight: 600; }
+  button.primary:hover { filter: brightness(1.05); }
+  .result { margin-top:14px; padding:12px; border:1px dashed #2a3340; border-radius:12px; background:#12161c; }
+  .correct { color: var(--accent); }
+  .wrong { color: var(--wrong); }
+  .footer { color: var(--muted); font-size:12px; margin-top:10px; text-align:center; }
+  .tag { font-size: 12px; color:#9bd6bd; border:1px solid #2d6b58; background:#0f1b18; padding:3px 8px; border-radius:999px; }
+  @keyframes floatIn {
+    from { transform: translateY(16px); opacity: 0; }
+    to   { transform: translateY(0); opacity: 1; }
+  }
+</style>
+
+<body>
+  <div class="wrap">
+    <header>
+      <h1>四川美食知识问答 <span class="tag">选项会“浮”出来</span></h1>
+      <div style="flex:1; max-width: 380px;">
+        <div class="progress"><div class="bar" id="bar"></div></div>
+      </div>
+    </header>
+
+    <div class="card" id="game">
+      <!-- 游戏内容将由 JS 渲染 -->
+    </div>
+
+    <p class="footer">说明：带「可多选」的题需要选择所有正确项才算对；移动端也可作答。</p>
+  </div>
+
+<script>
+/*
+  数据结构说明：
+  - type: "single" | "multi"  单选 / 多选
+  - q: 题干
+  - options: 选项数组
+  - ans: 正确答案的索引数组（多选时含多个）
+  - exp: 解析
+*/
+const BANK = [
+  {
+    type: "multi",
+    q: "以下哪些属于四川（含成都）知名小吃？（可多选）",
+    options: ["钟水饺", "担担面", "锅盖面", "龙抄手", "卤煮火烧"],
+    ans: [0,1,3],
+    exp: "钟水饺、担担面、龙抄手均为四川/成都经典小吃；锅盖面（江浙）、卤煮火烧（北京）。"
+  },
+  {
+    type: "single",
+    q: "以下哪道菜最能代表“回锅”的烹饪方法？",
+    options: ["回锅肉", "宫保鸡丁", "麻婆豆腐", "水煮鱼"],
+    ans: [0],
+    exp: "回锅肉是先煮后切再回锅炒制的代表菜。"
+  },
+  {
+    type: "multi",
+    q: "四川菜常讲“七滋八味”，下列哪几项是其常见味型？（可多选）",
+    options: ["麻辣", "鱼香", "怪味", "茄汁", "姜葱"],
+    ans: [0,1,2],
+    exp: "麻辣、鱼香、怪味等均属川菜味型；茄汁偏西式，姜葱不作为川菜味型名。"
+  },
+  {
+    type: "single",
+    q: "“麻婆豆腐”中“麻”的主要来源是？",
+    options: ["郫县豆瓣", "花椒", "干辣椒", "陈皮"],
+    ans: [1],
+    exp: "川菜“麻”来自花椒；“辣”主要来自辣椒与豆瓣。"
+  },
+  {
+    type: "single",
+    q: "下列哪一种是四川地区有代表性的发酵/调味制品？",
+    options: ["郫县豆瓣", "腐乳芝麻酱", "豆豉拌面酱", "草莓酱"],
+    ans: [0],
+    exp: "郫县豆瓣是川菜灵魂调料之一。"
+  },
+  {
+    type: "multi",
+    q: "说到四川火锅的典型搭配，下面哪些说法更贴切？（可多选）",
+    options: ["红锅牛油锅底", "蘸料以香油+蒜为主", "主打清汤不放辣椒", "常配毛肚鸭肠等涮品"],
+    ans: [0,1,3],
+    exp: "川渝牛油锅底+香油蒜泥蘸料最典型，清汤更像其他地区风格。"
+  },
+  {
+    type: "single",
+    q: "“夫妻肺片”的“肺”最初多指？",
+    options: ["真正的肺", "牛杂（以牛肚、牛筋等为主）", "猪下水", "鱼腩"],
+    ans: [1],
+    exp: "传统上指“废片”的谐音，多为牛杂拼盘。"
+  },
+  {
+    type: "multi",
+    q: "与“鱼香”味型常见搭配的基本调料有？（可多选）",
+    options: ["泡椒/豆瓣", "糖", "醋", "孜然", "芝麻酱"],
+    ans: [0,1,2],
+    exp: "鱼香是酸甜咸辣蒜姜葱复合味，常用泡椒/豆瓣、糖、醋。"
+  }
+];
+
+// 生成一套题（可随机抽题/打乱选项）
+function makeQuiz() {
+  const qs = structuredClone(BANK);
+  // 打乱题目顺序（你也可以固定顺序）
+  shuffle(qs);
+  // 每道题的选项顺序也打乱，但要同步更新答案索引
+  qs.forEach(item => {
+    const zipped = item.options.map((opt, i) => ({opt, i}));
+    shuffle(zipped);
+    item.options = zipped.map(z => z.opt);
+    const oldToNew = new Map(zipped.map((z, newIdx) => [z.i, newIdx]));
+    item.ans = item.ans.map(i => oldToNew.get(i)).sort((a,b)=>a-b);
+  });
+  return qs;
+}
+
+function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+let QUIZ = makeQuiz();
+let idx = 0;
+let picked = new Map(); // idx -> Set<number>
+const game = document.getElementById('game');
+const bar = document.getElementById('bar');
+
+render();
+
+function render() {
+  const total = QUIZ.length;
+  const q = QUIZ[idx];
+  bar.style.width = ((idx)/total*100).toFixed(1) + "%";
+
+  game.innerHTML = `
+    <div class="hint">第 ${idx+1} / ${total} 题 · ${q.type==="multi" ? "可多选" : "单选"}</div>
+    <div class="stem">${q.q}</div>
+    <div class="choices" id="choices"></div>
+    <div class="actions">
+      <button id="prev" ${idx===0?"disabled":""}>上一题</button>
+      <button id="clear">清空选择</button>
+      <div style="flex:1"></div>
+      <button id="next">下一题</button>
+      <button class="primary" id="submit">提交并查看结果</button>
+    </div>
+    <div class="result" id="explain" style="display:none"></div>
+  `;
+
+  const c = document.getElementById('choices');
+  const chosen = picked.get(idx) ?? new Set();
+
+  q.options.forEach((text, i) => {
+    const div = document.createElement('div');
+    div.className = 'choice';
+    div.setAttribute('role','button');
+    div.setAttribute('aria-pressed', chosen.has(i) ? 'true' : 'false');
+    div.style.animationDelay = `${i*60}ms`;
+
+    div.innerHTML = `<span class="bullet"></span>${text}`;
+    div.onclick = () => {
+      if(q.type === "single"){
+        chosen.clear();
+        chosen.add(i);
+      } else {
+        chosen.has(i) ? chosen.delete(i) : chosen.add(i);
+      }
+      picked.set(idx, new Set(chosen));
+      // 更新视觉状态
+      document.querySelectorAll('.choice').forEach((el, k)=>{
+        el.setAttribute('aria-pressed', chosen.has(k) ? 'true' : 'false');
+      });
+    };
+    c.appendChild(div);
+  });
+
+  document.getElementById('prev').onclick = ()=>{ if(idx>0){ idx--; render(); }};
+  document.getElementById('next').onclick = ()=>{ if(idx<total-1){ idx++; render(); }};
+  document.getElementById('clear').onclick = ()=>{ picked.delete(idx); render(); };
+  document.getElementById('submit').onclick = finish;
+}
+
+function finish(){
+  const total = QUIZ.length;
+  let right = 0;
+  let details = [];
+  for(let i=0;i<total;i++){
+    const q = QUIZ[i];
+    const chosen = Array.from(picked.get(i) ?? []).sort((a,b)=>a-b);
+    const ok = chosen.length===q.ans.length && chosen.every((v,k)=>v===q.ans[k]);
+    if(ok) right++;
+    const correctText = q.ans.map(j=>q.options[j]).join("；");
+    const chosenText = chosen.length ? chosen.map(j=>q.options[j]).join("；") : "（未作答）";
+    details.push(`
+      <p style="margin:.4em 0 .8em">
+        <b>${i+1}. ${q.q}</b><br>
+        你的选择：<span class="${ok?'correct':'wrong'}">${chosenText}</span><br>
+        正确答案：<span class="correct">${correctText}</span><br>
+        <span class="hint">${q.exp}</span>
+      </p>
+    `);
+  }
+
+  game.innerHTML = `
+    <div class="stem" style="margin-top:4px">成绩：<b style="color:var(--accent)">${right} / ${total}</b></div>
+    <div class="result">${details.join("")}</div>
+    <div class="actions" style="margin-top:14px">
+      <button id="again">再来一局（随机顺序）</button>
+      <button id="review">查看全部题目逐题作答</button>
+    </div>
+  `;
+  bar.style.width = "100%";
+  document.getElementById('again').onclick = ()=>{
+    QUIZ = makeQuiz(); idx=0; picked.clear(); render();
+  };
+  document.getElementById('review').onclick = ()=>{
+    QUIZ = structuredClone(BANK); idx=0; picked.clear(); render();
+  };
+}
+</script>
+</body>
+</html>
